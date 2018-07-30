@@ -53,12 +53,15 @@
 
 /* USER CODE BEGIN Includes */
 #include "freertos.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 osThreadId defaultTaskHandle;
 osThreadId LED_Thread1Handle;
 osThreadId LED_Thread2Handle;
+osMessageQId myQueue01Handle;
+osTimerId myTimer01Handle;
 osMutexId Mutex1Handle;
 osSemaphoreId SEM1Handle;
 osSemaphoreId SEM2Handle;
@@ -74,10 +77,11 @@ static void MX_GPIO_Init(void);
 void StartDefaultTask(void const * argument);
 void StartTask02(void const * argument);
 void StartTask03(void const * argument);
+void Callback01(void const * argument);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+//extern void initialise_monitor_handles(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -90,9 +94,11 @@ void StartTask03(void const * argument);
   * @retval None
   */
 int main(void)
+
 {
   /* USER CODE BEGIN 1 */
-
+	//initialise_monitor_handles();
+	//printf("asdffa\n");
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -123,7 +129,7 @@ int main(void)
   Mutex1Handle = osMutexCreate(osMutex(Mutex1));
 
   /* USER CODE BEGIN RTOS_MUTEX */
-  /* add mutexes, ... */
+//  /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
 
   /* Create the semaphores(s) */
@@ -139,6 +145,11 @@ int main(void)
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
 
+  /* Create the timer(s) */
+  /* definition and creation of myTimer01 */
+  osTimerDef(myTimer01, Callback01);
+  myTimer01Handle = osTimerCreate(osTimer(myTimer01), osTimerPeriodic, NULL);
+
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
@@ -149,16 +160,22 @@ int main(void)
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of LED_Thread1 */
-  osThreadDef(LED_Thread1, StartTask02, osPriorityLow, 0, 128);
+  osThreadDef(LED_Thread1, StartTask02, osPriorityHigh, 0, 128);
   LED_Thread1Handle = osThreadCreate(osThread(LED_Thread1), NULL);
 
   /* definition and creation of LED_Thread2 */
-  osThreadDef(LED_Thread2, StartTask03, osPriorityHigh, 0, 128);
+  osThreadDef(LED_Thread2, StartTask03, osPriorityBelowNormal, 0, 128);
   LED_Thread2Handle = osThreadCreate(osThread(LED_Thread2), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the queue(s) */
+  /* definition and creation of myQueue01 */
+/* what about the sizeof here??? cd native code */
+  osMessageQDef(myQueue01, 16, uint16_t);
+  myQueue01Handle = osMessageCreate(osMessageQ(myQueue01), NULL);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -294,13 +311,14 @@ void StartTask02(void const * argument)
 {
   /* USER CODE BEGIN StartTask02 */
   /* Infinite loop */
-  volatile osStatus status = osMutexWait(Mutex1Handle, 10000);
-  for(int i = 0; i < 5; i++)
-  {
-	HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-	osDelay(500);
-  }
-  osMutexRelease(Mutex1Handle);
+//  volatile osStatus status = osMutexWait(Mutex1Handle, 10000);
+//  for(int i = 0; i < 5; i++)
+//  {
+//	HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
+//	osDelay(500);
+//  }
+//  osMutexRelease(Mutex1Handle);
+	osMessagePut (myQueue01Handle, 1,0 );
   /* USER CODE END StartTask02 */
 }
 
@@ -309,16 +327,25 @@ void StartTask03(void const * argument)
 {
   /* USER CODE BEGIN StartTask03 */
   /* Infinite loop */
-  osMutexWait(Mutex1Handle, 8000);
-  for(int i = 0; i < 3; i++)
-  {
-	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-	osDelay(1000);
-//    osDelay(1);
-  }
-  volatile osStatus status = osMutexRelease(Mutex1Handle);
+//  osMutexWait(Mutex1Handle, 8000);
+//  for(int i = 0; i < 3; i++)
+//  {
+//	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+//	osDelay(1000);
+////    osDelay(1);
+//  }
+//  volatile osStatus status = osMutexRelease(Mutex1Handle);
   volatile int i;
+	volatile osEvent x=osMessageGet (myQueue01Handle,0 );
   /* USER CODE END StartTask03 */
+}
+
+/* Callback01 function */
+void Callback01(void const * argument)
+{
+  /* USER CODE BEGIN Callback01 */
+  HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
+  /* USER CODE END Callback01 */
 }
 
 /**

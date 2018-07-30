@@ -1,9 +1,12 @@
 #MicroXplorer Configuration settings - do not modify
 FREERTOS.BinarySemaphores01=SEM1,Dynamic,NULL;SEM2,Dynamic,NULL
 FREERTOS.FootprintOK=true
-FREERTOS.IPParameters=Tasks01,FootprintOK,BinarySemaphores01,Mutexes01
+FREERTOS.IPParameters=Tasks01,FootprintOK,BinarySemaphores01,Mutexes01,configUSE_TIMERS,Timers01,Queues01
 FREERTOS.Mutexes01=Mutex1,Dynamic,NULL
-FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LED_Thread1,-2,128,StartTask02,Default,NULL,Dynamic,NULL,NULL;LED_Thread2,2,128,StartTask03,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.Queues01=myQueue01,16,uint16_t,0,Dynamic,NULL,NULL
+FREERTOS.Tasks01=defaultTask,0,128,StartDefaultTask,Default,NULL,Dynamic,NULL,NULL;LED_Thread1,2,128,StartTask02,Default,NULL,Dynamic,NULL,NULL;LED_Thread2,-1,128,StartTask03,Default,NULL,Dynamic,NULL,NULL
+FREERTOS.Timers01=myTimer01,Callback01,osTimerPeriodic,Default,NULL,Dynamic,NULL
+FREERTOS.configUSE_TIMERS=1
 File.Version=6
 KeepUserPlacement=false
 Mcu.Family=STM32F4
