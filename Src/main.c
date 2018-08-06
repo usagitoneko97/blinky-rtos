@@ -94,7 +94,6 @@ void Callback01(void const * argument);
   * @retval None
   */
 int main(void)
-
 {
   /* USER CODE BEGIN 1 */
 	//initialise_monitor_handles();
@@ -312,13 +311,18 @@ void StartTask02(void const * argument)
   /* USER CODE BEGIN StartTask02 */
   /* Infinite loop */
 //  volatile osStatus status = osMutexWait(Mutex1Handle, 10000);
-//  for(int i = 0; i < 5; i++)
-//  {
-//	HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-//	osDelay(500);
-//  }
+  for(;;)
+  {
+	 osMutexWait (Mutex1Handle,0);
+	 HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin,1);
+//	 volatile osStatus m =osMessagePut (myQueue01Handle, 520,0 );
+	 osDelay(5000);
+	 osMutexRelease (Mutex1Handle);
+	 osDelay(500);
+  }
 //  osMutexRelease(Mutex1Handle);
-	osMessagePut (myQueue01Handle, 1,0 );
+//volatile osStatus m =osMessagePut (myQueue01Handle, 1,0 );
+	//vTaskDelete(NULL);
   /* USER CODE END StartTask02 */
 }
 
@@ -328,15 +332,19 @@ void StartTask03(void const * argument)
   /* USER CODE BEGIN StartTask03 */
   /* Infinite loop */
 //  osMutexWait(Mutex1Handle, 8000);
-//  for(int i = 0; i < 3; i++)
-//  {
-//	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-//	osDelay(1000);
-////    osDelay(1);
-//  }
+	  for(;;)
+	  {
+		osMutexWait (Mutex1Handle,0);
+		HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin,0);
+//		volatile osStatus m =osMessagePut (myQueue01Handle, 520,0 );
+		osDelay(5000);
+		osMutexRelease (Mutex1Handle);
+		osDelay(500);
+	  }
 //  volatile osStatus status = osMutexRelease(Mutex1Handle);
-  volatile int i;
-	volatile osEvent x=osMessageGet (myQueue01Handle,0 );
+  //volatile int i;
+  //volatile osEvent x=osMessageGet (myQueue01Handle,500 );
+//	vTaskDelete(NULL);
   /* USER CODE END StartTask03 */
 }
 
